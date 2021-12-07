@@ -14,10 +14,7 @@ You are about to be logged out! Click Ok to stay signed in.
 //menu will go here
 //
 echo "<div class='nav_menu'>";
-echo "Home | Grooming | Kennels | Welcome {$_SESSION['user_name']} |";
-if($_SESSION['valid_login']==1){
-	echo "<a href='includes/logout.php'>Logout</a>";
-}
+echo "<a href='home.php'>Home</a> | Grooming | <a href='reservation.php'>New Reservation/Appointment</a> | Welcome {$_SESSION['user_name']} | <a href='includes/logout.php'>Logout</a>";
 echo "</div>";
 
 ?>

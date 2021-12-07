@@ -1,5 +1,4 @@
 <?php
-	session_start();
 	require	'../includes/dbConfig.php';
 
 	// Format date string passed by the JS. If none was provided, just use today's date.	
