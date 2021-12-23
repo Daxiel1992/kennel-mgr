@@ -1,7 +1,6 @@
 <?php
 	session_start();
-	require '../includes/dbConfig.php';
-	require 'includes/auth.php';
+	require_once '../includes/dbConfig.php';
 
 	$result = $db->query("SELECT * FROM clients");
 	while($row = $result->fetch_assoc()) {
@@ -95,17 +94,53 @@
 					}
 				});
 			});
+			
+			function openFloating() {
+				$(`#floating`).css('display', 'block');
+				$(`#floating_bg`).css('display', 'block');
+			}
+			
+			function closeFloating() {
+				$(`#floating`).css('display', 'none');
+				$(`#floating_bg`).css('display', 'none');
+			}
 		</script>
+		<style>
+			#floating {
+				position: absolute;
+				top: 85px;
+				left: 0px;
+				right: 0px;
+   				width: 892px;
+    				height: 378px;
+				margin: 0px auto !important;
+				background-color: white;
+				box-shadow: #00000040 0px 0px 30px;
+			}
+			
+			#floating_bg {
+				background: rgba(0, 0, 0, 0.578);
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
 	</head>
 	<body>
 		<?php
 			//Header and any errors or messages
-			require 'includes/header.php';
 			if(isset($message)){
 				echo "<h3 style='color: {$message_color};'>{$message}</h3>";
 			}
 		?>
-
+		<div id="floating_bg" style="display: none;" ></div>
+		<div id="floating" style="display: none;">
+			<button type="button" onclick="closeFloating()" style="position: absolute; top: 0; right: 0; margin: 5px">X</button>
+			<iframe src="new_client.php" style="width: inherit; height: inherit; display: block; border: none;"></iframe>
+		</div>
+		
 		<!--- First form to select the Client, Start Date, and End Date --->
 		<form action="" method="post">
 			<input type="hidden" name="mode" value="select_pets">
@@ -117,10 +152,11 @@
 					} else {
 						$selected = "";
 					}
-				echo "<option value='{$client}' {$selected}>{$value}</option>";
+					echo "<option value='{$client}' {$selected}>{$value}</option>";
 				}
 			?>
-			</select><br>
+			</select><button type="button" onclick="openFloating()" style="margin-left: 5px;">New Client</button>
+			<br>
 			Start Date: <input type="date" name="start_date" value="<?php if(isset($_SESSION['start_date'])){echo $_SESSION['start_date'];}?>"><br>
 			End Date: <input type="date" name="end_date" value="<?php if(isset($_SESSION['end_date'])){echo $_SESSION['end_date'];}?>"><br>
 			<input type="submit" value="Select Pets">
