@@ -94,7 +94,7 @@
 		}
 	?>
 
-	<h2>Create New Client</h2>
+	<h2>Create New Pet</h2>
 	<form method="POST">
 		<input type="hidden" name="mode" value="create_client">
 		<div class="flex-wrapper">

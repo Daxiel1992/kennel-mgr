@@ -120,7 +120,7 @@
 				left: 0px;
 				right: 0px;
    				width: 892px;
-    				height: 378px;
+    				height: 309px;
 				margin: 0px auto !important;
 				background-color: white;
 				box-shadow: #00000040 0px 0px 30px;
