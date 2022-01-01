@@ -70,7 +70,8 @@
 				searchString: ''
 			});
 
-			$("#searchButton").click(function(){
+			//$("#searchButton").click(function(){
+			$("#clientSearch").keyup(function() {
 				var searchValue = document.getElementById("clientSearch").value;
 				$("#clientSelector").load("get_clients.php", {
 					searchString: searchValue

@@ -20,16 +20,24 @@
 			$client_phone = $client['phone'];
 			$client_address = $client['address'];
 			$client_address2 = $client['address_2'];
-			$client_zip = $client['city'] . ", " . $client['state'] . " " . $client['zip'];
+			if($client['city'] != '') {
+				$client_zip = $client['city'] . ", " . $client['state'] . " " . $client['zip'];
+			}  
 		}
 
 		echo "<div id='clientInfo'>";
 			echo "<p>Name: {$client_name}</p>";
-			echo "<p>Dogs: ";
+			echo "<p>Pets: ";
 		echo "</div>";
 		echo "<div id='clientInfo'>";
 			echo "<p>Phone: {$client_phone}</p>";
-			echo "<p>Address: {$client_address}<br>{$client_address2}<br>{$client_zip}</p>";
+			if(!is_null($client_address)) {
+				echo "<p style='margin-bottom: 0px;'>Address: {$client_address}</p>";
+				echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_address2}</p>";
+				if(isset($client_zip)) {
+					echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_zip}</p>";
+				}
+			}
 		echo "</div>";
 	}
 ?>
