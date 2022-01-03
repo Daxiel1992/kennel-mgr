@@ -46,20 +46,42 @@
 		}
 
 		#clientInfoDiv {
-			display: flex;
 			position: relative;
 			left: 300px;
-			width: fit-content;
+			width: calc(100% - 300px);
 		}
 
 		#clientInfo {
 			float: left;
 			margin-left: 20px;
+			margin-bottom: 10px;
 			width: 300px;
 		}
 
 		#clientInfo * {
 			margin-left: 20px
+		}
+
+		#clientPrevRes {
+			position: relative;
+			left: 300;
+			width: calc(100% - 330px);
+			flex: 1 1 auto;
+			margin: 10px 15px;
+			border: solid 0.5px #9a9a9a;
+			background: ;
+			overflow-y: scroll;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		td, th {
+			border: solid 1px #dddddd;
+			text-align: left;
+
 		}
 	</style>
 
@@ -81,7 +103,12 @@
 			$("#clientSelector").change(function() {
 				var clientID = this.value;
 				$("#clientInfoDiv").load("get_clients.php", {
-					client_id: clientID
+					client_id: clientID,
+					data: "info"
+				});
+				$("#clientPrevRes").load("get_clients.php", {
+					client_id: clientID,
+					data: "res"
 				});
 			});
 		});
@@ -100,10 +127,13 @@
 			<select id="clientSelector" multiple></select>
 		</div>
 	</div>
-	
-	<h1 style="position: relative; left: 315px; margin-bottom: 0px; width: fit-content;">Client Information</h1>
-	<div id="clientInfoDiv">
+	<div id="clientContainer" style="display: flex; flex-direction: column; height: 100%;">
+		<h1 style="position: relative; left: 315px; margin-bottom: 0px; width: fit-content;">Client Information</h1>
+		<div id="clientInfoDiv">
+		</div>
+		<hr style='position: relative; left: 300px; width: calc(100% - 330px); margin: 0 15px;'>
+		<div id="clientPrevRes">
+		</div>
 	</div>
-	<hr style="position: relative; left: 300px; width: calc(100% - 325px); margin: 0 15px;">
 </body>
 </html>
