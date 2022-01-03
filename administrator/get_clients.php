@@ -8,12 +8,7 @@
 		$result = $db->query("SELECT * FROM `clients` WHERE `first_name` LIKE '%{$searchString}%' OR `last_name` LIKE '%{$searchString}%' OR `phone` LIKE '%{$searchString}%' ORDER BY `last_name` ASC;");
 
 		while($client = $result->fetch_assoc()) {
-			if(!isset($selected)){
-				echo "<option value='{$client['id']}' selected>{$client['last_name']}, {$client['first_name']}</option>";
-				$selected = 1;
-			} else {
-				echo "<option value='{$client['id']}'>{$client['last_name']}, {$client['first_name']}</option>";
-			}
+			echo "<option value='{$client['id']}'>{$client['last_name']}, {$client['first_name']}</option>";
 		}
 	}
 
