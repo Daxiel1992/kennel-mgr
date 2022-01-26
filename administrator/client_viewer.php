@@ -55,7 +55,7 @@
 			float: left;
 			margin-left: 20px;
 			margin-bottom: 10px;
-			width: 300px;
+			width: 400px;
 		}
 
 		#clientInfo * {
@@ -73,6 +73,35 @@
 			overflow-y: scroll;
 		}
 
+		#clientLinks {
+			position: relative;
+			width: fit-content;
+			left: 20px;
+		}
+
+		#floating {
+			position: absolute;
+			top: 85px;
+			left: 0px;
+			right: 0px;
+			width: 892px;
+			height: 340px;
+			margin: 0px auto !important;
+			background-color: white;
+			box-shadow: #00000040 0px 0px 30px;
+			z-index: 2;
+		}
+
+		#floating_bg {
+			background: rgba(0, 0, 0, 0.578);
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 100%;
+			z-index: 1;
+		}
+
 		table {
 			width: 100%;
 			border-collapse: collapse;
@@ -87,21 +116,29 @@
 
 	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 	<script>
+		// Set clientID and searchValue to use globally
+		var clientID = null;
+		var searchValue = null;
+
 		$(document).ready(function(){
 			$("#clientSelector").load("get_clients.php", {
 				searchString: ''
 			});
 
+			// Load the select box based on the search term given
 			//$("#searchButton").click(function(){
 			$("#clientSearch").keyup(function() {
-				var searchValue = document.getElementById("clientSearch").value;
+				searchValue = document.getElementById("clientSearch").value;
 				$("#clientSelector").load("get_clients.php", {
 					searchString: searchValue
+				}, function() {
+					document.getElementById("clientSelector").value = clientID;
 				});
 			});
 
+			// When a client is selected, load their info and reservations into seperate divs
 			$("#clientSelector").change(function() {
-				var clientID = this.value;
+				clientID = this.value;
 				$("#clientInfoDiv").load("get_clients.php", {
 					client_id: clientID,
 					data: "info"
@@ -112,11 +149,32 @@
 				});
 			});
 		});
-		
 
+
+		// Functions to control the iFrame and their parent divs
+		function showFloating() {
+			document.getElementById("floating").innerHTML = `<iframe src="client_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+			$("#floating").css('display', 'block');
+			$(`#floating_bg`).css('display', 'block');
+		}
+
+		function hideFloating() {
+			$("#floating").css('display', 'none');
+			$(`#floating_bg`).css('display', 'none');
+			$("#clientSelector").load("get_clients.php", {
+				searchString: searchValue
+			}, function() {
+				document.getElementById("clientSelector").value = clientID;
+			});
+			$("#clientInfoDiv").load("get_clients.php", {
+				client_id: clientID,
+				data: "info"
+			});
+		}
 	</script>
 </head>
 <body>
+	
 	<div id="clientSearchDiv">
 		<h1 style="margin-left: 22px;">Client Viewer</h1>
 		<div id="searchBar">
@@ -129,11 +187,13 @@
 	</div>
 	<div id="clientContainer" style="display: flex; flex-direction: column; height: 100%;">
 		<h1 style="position: relative; left: 315px; margin-bottom: 0px; width: fit-content;">Client Information</h1>
-		<div id="clientInfoDiv">
+		<div id="clientInfoDiv">	
 		</div>
 		<hr style='position: relative; left: 300px; width: calc(100% - 330px); margin: 0 15px;'>
 		<div id="clientPrevRes">
 		</div>
 	</div>
+	<div id="floating_bg" style="display: none;" onclick="hideFloating()"></div>
+	<div id="floating" style="display: none;"></div>
 </body>
 </html>

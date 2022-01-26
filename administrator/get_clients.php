@@ -15,7 +15,8 @@
 	// When an option is selected from the search, we grab all the client's info and echo it into the info div.
 	if(isset($_POST['client_id']) AND $_POST['data'] == "info") {
 		$client_id = mysqli_real_escape_string($db, $_POST['client_id']);
-		$clientInfo = $db-> query("SELECT * FROM `clients` WHERE `id` = {$client_id}");
+		$clientInfo = $db->query("SELECT * FROM `clients` WHERE `id` = '$client_id'");
+		$petInfo = $db->query("SELECT `name`, `breed` FROM `pets` WHERE `client_id` = '$client_id'");
 
 		// Format the data properly and set them to easy to use variables
 		while($client = $clientInfo->fetch_assoc()) {
@@ -28,10 +29,25 @@
 			}  
 		}
 
+		while($pet = $petInfo->fetch_assoc()) {
+			$petArray[] = $pet['name'] . " - " . $pet['breed'];
+		}
+		
+		// If there are no pets, set the array blank to avoid errors
+		if(!isset($petArray)) {
+			$petArray[] = "";
+		}
 		// Display the information
 		echo "<div id='clientInfo'>";
 			echo "<p>Name: {$client_name}</p>";
-			echo "<p>Pets: ";
+			echo "<p style='margin-bottom: 0px;'>Pets: ";
+			$index = 0;
+			foreach ($petArray as $pet) {
+				if($index == 0) { echo "{$pet}</p>"; $index++;} else {
+					echo "<p style='margin-left: 55px; margin-top: 0px; margin-bottom: 0px;'>{$pet}</p>";
+				}
+
+			} 
 		echo "</div>";
 		echo "<div id='clientInfo'>";
 			echo "<p>Phone: {$client_phone}</p>";
@@ -43,6 +59,10 @@
 				}
 			}
 		echo "</div>";
+		echo "<div id='clientLinks'>
+			<a href='#' onclick='showFloating()'>Edit Client</a>
+		</div>";
+
 	}
 
 	// For the Previous Reservations Table, we pull the reservations, grab the pets related to it, and format them into a table.
