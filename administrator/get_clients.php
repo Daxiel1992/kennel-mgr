@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	require_once('../includes/dbConfig.php');
+	require '../includes/commonFunctions.php';
 
 	// Controller for the search portion of the Client Viewer. Takes an input string, searches for matches in the users table in the name and phone number, and returns all matches as options in select.
 	if(isset($_POST['searchString'])) {
@@ -20,17 +21,17 @@
 
 		// Format the data properly and set them to easy to use variables
 		while($client = $clientInfo->fetch_assoc()) {
-			$client_name = $client['first_name'] . " " . $client['last_name'];
-			$client_phone = $client['phone'];
-			$client_address = $client['address'];
-			$client_address2 = $client['address_2'];
+			$client_name = cleanOutputs($client['first_name']) . " " . cleanOutputs($client['last_name']);
+			$client_phone = cleanOutputs($client['phone']);
+			$client_address = cleanOutputs($client['address']);
+			$client_address2 = cleanOutputs($client['address_2']);
 			if($client['city'] != '') {
-				$client_zip = $client['city'] . ", " . $client['state'] . " " . $client['zip'];
+				$client_zip = cleanOutputs($client['city']) . ", " . cleanOutputs($client['state']) . " " . cleanOutputs($client['zip']);
 			}  
 		}
 
 		while($pet = $petInfo->fetch_assoc()) {
-			$petArray[] = $pet['name'] . " - " . $pet['breed'];
+			$petArray[] = cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']);
 		}
 		
 		// If there are no pets, set the array blank to avoid errors
@@ -51,12 +52,10 @@
 		echo "</div>";
 		echo "<div id='clientInfo'>";
 			echo "<p>Phone: {$client_phone}</p>";
-			if(!is_null($client_address)) {
-				echo "<p style='margin-bottom: 0px;'>Address: {$client_address}</p>";
-				echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_address2}</p>";
-				if(isset($client_zip)) {
-					echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_zip}</p>";
-				}
+			echo "<p style='margin-bottom: 0px;'>Address: {$client_address}</p>";
+			echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_address2}</p>";
+			if(isset($client_zip)) {
+				echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_zip}</p>";
 			}
 		echo "</div>";
 		echo "<div id='clientLinks'>
@@ -87,9 +86,9 @@
 
 				while($pet = $clientPet->fetch_assoc()) {
 					if(isset($petsArray)) {
-						$petsArray[] = "<br>" . $pet['name'] . " - " . $pet['breed'];
+						$petsArray[] = "<br>" . cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']);
 					} else {
-						$petsArray[] = $pet['name'] . " - " . $pet['breed'];
+						$petsArray[] = cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']);
 					}
 				}
 			}

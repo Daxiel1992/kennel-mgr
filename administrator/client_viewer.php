@@ -1,7 +1,6 @@
 <?php
 	session_start();
 	require_once '../includes/dbConfig.php';
-
 ?>
 
 <html>
@@ -85,7 +84,7 @@
 			left: 0px;
 			right: 0px;
 			width: 892px;
-			height: 340px;
+			height: 380px;
 			margin: 0px auto !important;
 			background-color: white;
 			box-shadow: #00000040 0px 0px 30px;
