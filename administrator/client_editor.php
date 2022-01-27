@@ -121,53 +121,7 @@
 <head>
 	<title>Edit Client</title>
 
-	<style> 
-		.flex-wrapper {
-			display: flex;
-		}
-	
-		.input_div {
-			width: 50%; 
-			float: left; 
-			margin: 0 12px;
-		}
-
-		.location_inputs {
-			width: 32%;
-			float: left;
-			margin: 0px 1%;
-		}
-
-		.form_button {
-			float: right;
-			padding: 15px 20px;
-			margin: 0 12px;
-			background-color: #2c7636;
-			color: white;
-			border: none;
-			text-decoration: none;
-			cursor: pointer;
-			transition: .2s ease-in-out;
-		}
-
-		.form_button:hover {
-			background-color: #1b4922;
-		}
-	
-		input[type=text] {
-			width: 100%;
-			padding: 12px 20px;
-			margin: 8px 0;
-	 		box-sizing: border-box;
-		}
-		
-		select {
-			width: 100%;
-			padding: 12px 20px;
-			margin: 8px 0;
-	 		box-sizing: border-box;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="popupform.css"/>
 </head>
 <body>
 	<h2 style="float: left; margin-top: 0px;">Edit Client</h2>
