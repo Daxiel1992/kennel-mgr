@@ -5,7 +5,7 @@
 ?>
 <html>
 <head>
-	<title>iFrame Test</title>
+	<title>Kennel Manager Alpha</title>
 
 	<style>
 		#header {

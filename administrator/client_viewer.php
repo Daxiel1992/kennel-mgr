@@ -151,8 +151,14 @@
 
 
 		// Functions to control the iFrame and their parent divs
-		function showFloating() {
-			document.getElementById("floating").innerHTML = `<iframe src="client_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+		function showFloating(form) {
+			if(form == "client") {
+				$("#floating").css('height', '351px');
+				document.getElementById("floating").innerHTML = `<iframe src="client_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+			} else if(form == "pet") {
+				$("#floating").css('height', '270px');
+				document.getElementById("floating").innerHTML = `<iframe src="pet_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+			}
 			$("#floating").css('display', 'block');
 			$(`#floating_bg`).css('display', 'block');
 		}
@@ -165,9 +171,15 @@
 			}, function() {
 				document.getElementById("clientSelector").value = clientID;
 			});
+			
 			$("#clientInfoDiv").load("get_clients.php", {
 				client_id: clientID,
 				data: "info"
+			});
+			
+			$("#clientPrevRes").load("get_clients.php", {
+				client_id: clientID,
+				data: "res"
 			});
 		}
 	</script>

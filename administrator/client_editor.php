@@ -6,6 +6,7 @@
 	// Set empty variables to avoid errors	
 	$message = "";
 	$missingInputs = "";
+	$longInputs = "";
 
 	// Initial GET from the Client Viewer. Sets all of the proper variables.
 	if(isset($_GET['client_id']) AND !isset($getDone)) {
@@ -28,11 +29,11 @@
 	if(isset($_POST['mode']) AND $_POST['mode'] == "create_client") {
 		
 		$inputsArray = array (
-			array('client_fname', 'First Name', 1),
-			array('client_lname', 'Last Name', 1),
-			array('client_phone', 'Phone Number', 1),
-			array('client_address', 'Address', 0),
-			array('client_address2', 'Mailing Address', 0)
+			array('client_fname', 'First Name', 1, 255),
+			array('client_lname', 'Last Name', 1, 255),
+			array('client_phone', 'Phone Number', 1, 20),
+			array('client_address', 'Address', 0, 255),
+			array('client_address2', 'Mailing Address', 0, 255)
 		);
 		checkInputs($inputsArray);
 
@@ -43,9 +44,9 @@
 			$client_zip = "";
 		} else {
 			$inputsArray = array (
-				array('client_city', 'City', 1),
-				array('client_state', 'State', 1),
-				array('client_zip', 'Zip', 1),
+				array('client_city', 'City', 1, 255),
+				array('client_state', 'State', 1, 2),
+				array('client_zip', 'Zip', 1, 255),
 			);
 			checkInputs($inputsArray);
 		} 
@@ -55,9 +56,14 @@
 			$message_color = "red";
 			$message = "Client's {$missingInputs} is Required!";
 		} else {
-			$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = {$client_id}");
-			$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" updated!";
-			$message_color = "green";
+			if(!empty($longInputs)) {
+				$message_color = "red";
+				$message = "{$longInputs} is too long of a value!";
+			} else {
+				$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = {$client_id}");
+				$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" updated!";
+				$message_color = "green";
+			}
 		}
 	}
 

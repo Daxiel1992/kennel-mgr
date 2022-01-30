@@ -27,7 +27,9 @@
 			$client_address2 = cleanOutputs($client['address_2']);
 			if($client['city'] != '') {
 				$client_zip = cleanOutputs($client['city']) . ", " . cleanOutputs($client['state']) . " " . cleanOutputs($client['zip']);
-			}  
+			} else {
+				$client_zip = "";
+			}
 		}
 
 		while($pet = $petInfo->fetch_assoc()) {
@@ -41,25 +43,35 @@
 		// Display the information
 		echo "<div id='clientInfo'>";
 			echo "<p>Name: {$client_name}</p>";
-			echo "<p style='margin-bottom: 0px;'>Pets: ";
-			$index = 0;
-			foreach ($petArray as $pet) {
-				if($index == 0) { echo "{$pet}</p>"; $index++;} else {
-					echo "<p style='margin-left: 55px; margin-top: 0px; margin-bottom: 0px;'>{$pet}</p>";
-				}
-
-			} 
+			echo "<div style='position: relative;'>";
+				echo "<p style='margin: 0px; display: inline-block; position: absolute; top: 0px; left: 0px'>Pets:</p>";
+				echo "<p style='display: inline-block; margin: 0px 0px 0px 37px;'>";
+				foreach ($petArray as $pet) {
+						echo "{$pet}<br>";
+				} 
+				echo "</p>";
+			echo "</div>";
 		echo "</div>";
 		echo "<div id='clientInfo'>";
 			echo "<p>Phone: {$client_phone}</p>";
-			echo "<p style='margin-bottom: 0px;'>Address: {$client_address}</p>";
-			echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_address2}</p>";
-			if(isset($client_zip)) {
-				echo "<p style='margin-left: 80px; margin-top: 0px; margin-bottom: 0px;'>{$client_zip}</p>";
-			}
+			echo "<div style='position: relative;'>";
+				echo "<p style='margin: 0px; display: inline-block; position: absolute; top: 0px; left: 0px'>Address:</p>";
+				echo "<p style='display: inline-block; margin: 0px 0px 0px 61px;'>";
+				if($client_address != '') {
+					echo "{$client_address}<br>";
+				}
+				if($client_address2 != '') {
+					echo "{$client_address2}<br>";
+				}
+				if($client_zip != '') {
+					echo "{$client_zip}<br>";
+				}
+				echo "</p>";
+			echo "</div>";
 		echo "</div>";
 		echo "<div id='clientLinks'>
-			<a href='#' onclick='showFloating()'>Edit Client</a>
+			<a href='#' onclick='showFloating(\"client\")'>Edit Client</a>
+			<a href='#' onclick='showFloating(\"pet\")'>Add/Edit Pets</a>
 		</div>";
 
 	}
@@ -71,9 +83,9 @@
 
 		echo "<table id='prevResTable'>
 			<tr>
-				<th>Date</th>
-				<th>Type</th>
-				<th>Pets</th>
+				<th style='width: 30%;'>Date</th>
+				<th style='width: 30%;'>Type</th>
+				<th style='width: 30%;'>Pets</th>
 			</tr>";
 
 		// Loop through each reservation found for the client
