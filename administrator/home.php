@@ -82,7 +82,7 @@
 <div id="main_block">
 <iframe id="cal" src="calendar.php" style="display: block;"></iframe>
 <iframe id="res" src="reservation.php" style="display: none;"></iframe>
-<iframe id="clientViewer" src="client_viewer.php" style="display: none;"></iframe>
+<iframe id="clientViewer" src="client_viewer.html" style="display: none;"></iframe>
 </div>
 </body>
 </html>
