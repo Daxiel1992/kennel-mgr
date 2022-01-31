@@ -5,7 +5,7 @@
 
 	// Controller for the search portion of the Client Viewer. Takes an input string, searches for matches in the users table in the name and phone number, and returns all matches as options in select.
 	if(isset($_POST['searchString'])) {
-		$searchString = mysqli_real_escape_string($db, $_POST['searchString']);
+		$searchString = substr(mysqli_real_escape_string($db, $_POST['searchString']), 0, 40);
 		$result = $db->query("SELECT * FROM `clients` WHERE `first_name` LIKE '%{$searchString}%' OR `last_name` LIKE '%{$searchString}%' OR `phone` LIKE '%{$searchString}%' ORDER BY `last_name` ASC;");
 		
 		echo "<option value='new_client'>New Client</option>";

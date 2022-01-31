@@ -201,7 +201,7 @@
 	<div id="clientSearchDiv">
 		<h1 style="margin-left: 22px;">Client Viewer</h1>
 		<div id="searchBar">
-			<input type="text" name="clientSearch" id="clientSearch">
+			<input type="text" name="clientSearch" id="clientSearch" maxlength="40">
 			<button type="button" id="searchButton" style="width: 32.625px; height: 21px; vertical-align: bottom;">&#x1F50E</button>
 		</div>
 		<div id="selectClient">
