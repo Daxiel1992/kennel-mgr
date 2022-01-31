@@ -1,6 +1,6 @@
 <?php
-	$program_name = "Kennel Tracker";
-	$program_version = "Minecraft Alpha 1.0.0";
+	$program_name = "Kennel Manager";
+	$program_version = "Kennel Manager Alpha 2.0.0";
 
 	$dbHost = "localhost";
 	$dbUsername = "root";

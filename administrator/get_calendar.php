@@ -1,5 +1,6 @@
 <?php
 	require	'../includes/dbConfig.php';
+	require '../includes/commonFunctions.php';
 
 	// Format date string passed by the JS. If none was provided, just use today's date.	
 	if(isset($_POST['newDate'])) {
@@ -34,10 +35,10 @@
 				$kennel_name = $kennel['name'];
 			}
 			while($pets_array = $get_pets->fetch_assoc()) {
-				$pet = $pets_array['name'] . " - " . $pets_array['breed'];	
+				$pet = cleanOutputs($pets_array['name']) . " - " . cleanOutputs($pets_array['breed']);	
 			}
 			while($client = $get_clients->fetch_assoc()) {
-				$client_name = $client['first_name'] . " " . $client['last_name'];
+				$client_name = cleanOutputs($client['first_name']) . " " . cleanOutputs($client['last_name']);
 			}
 			
 			// Loop through our $appointments array and if there are dogs staying in the same kennel together, don't create another entry, but just combine the two.
