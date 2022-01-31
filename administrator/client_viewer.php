@@ -138,14 +138,25 @@
 			// When a client is selected, load their info and reservations into seperate divs
 			$("#clientSelector").change(function() {
 				clientID = this.value;
-				$("#clientInfoDiv").load("get_clients.php", {
-					client_id: clientID,
-					data: "info"
-				});
-				$("#clientPrevRes").load("get_clients.php", {
-					client_id: clientID,
-					data: "res"
-				});
+				if(clientID == "new_client") {
+					$.post("get_clients.php", {
+						data: "unsetClient"
+					});
+
+					document.getElementById("clientInfoDiv").innerHTML = "";
+					document.getElementById("clientPrevRes").innerHTML = "";
+
+					showFloating("client");
+				} else {
+					$("#clientInfoDiv").load("get_clients.php", {
+						client_id: clientID,
+						data: "info"
+					}, function() {
+						$("#clientPrevRes").load("get_clients.php", {
+							data: "res"
+						});
+					});
+				}
 			});
 		});
 
@@ -154,10 +165,10 @@
 		function showFloating(form) {
 			if(form == "client") {
 				$("#floating").css('height', '351px');
-				document.getElementById("floating").innerHTML = `<iframe src="client_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+				document.getElementById("floating").innerHTML = `<iframe src="client_editor.php" style="width: 100%; height: 100%; border: 0;"></iframe>`;
 			} else if(form == "pet") {
 				$("#floating").css('height', '270px');
-				document.getElementById("floating").innerHTML = `<iframe src="pet_editor.php?client_id=${clientID}" style="width: 100%; height: 100%; border: 0;"></iframe>`;
+				document.getElementById("floating").innerHTML = `<iframe src="pet_editor.php" style="width: 100%; height: 100%; border: 0;"></iframe>`;
 			}
 			$("#floating").css('display', 'block');
 			$(`#floating_bg`).css('display', 'block');
@@ -166,6 +177,9 @@
 		function hideFloating() {
 			$("#floating").css('display', 'none');
 			$(`#floating_bg`).css('display', 'none');
+			
+			$.get("get_clients.php", { data: "editing_client_id" }, function(data){ clientID = data;});
+
 			$("#clientSelector").load("get_clients.php", {
 				searchString: searchValue
 			}, function() {
@@ -173,12 +187,10 @@
 			});
 			
 			$("#clientInfoDiv").load("get_clients.php", {
-				client_id: clientID,
 				data: "info"
 			});
 			
 			$("#clientPrevRes").load("get_clients.php", {
-				client_id: clientID,
 				data: "res"
 			});
 		}

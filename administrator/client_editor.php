@@ -9,9 +9,8 @@
 	$longInputs = "";
 
 	// Initial GET from the Client Viewer. Sets all of the proper variables.
-	if(isset($_GET['client_id']) AND !isset($getDone)) {
-		$client_id = mysqli_real_escape_string($db, $_GET['client_id']);
-		$result = $db->query("SELECT * FROM `clients` WHERE `id` = {$client_id}");
+	if(isset($_SESSION['editing_client_id'])) {
+		$result = $db->query("SELECT * FROM `clients` WHERE `id` = '{$_SESSION['editing_client_id']}'");
 		while($row = $result->fetch_assoc()) {
 			$client_fname = $row['first_name'];
 			$client_lname = $row['last_name'];
@@ -22,7 +21,6 @@
 			$client_state = $row['state'];
 			$client_zip = $row['zip'];
 		}
-		$getDone = 1;
 	}
 
 	// When the form is submitted, run our inputs through the checkInputs fuction and update the client if no errors are thrown.
@@ -60,9 +58,17 @@
 				$message_color = "red";
 				$message = "{$longInputs} is too long of a value!";
 			} else {
-				$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = {$client_id}");
-				$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" updated!";
-				$message_color = "green";
+				if(isset($_SESSION['editing_client_id'])) {
+					$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = '{$_SESSION['editing_client_id']}'");
+					$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" updated!";
+					$message_color = "green";
+				} else {					
+					$db->query("INSERT INTO `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip'");
+					$_SESSION['client_created'] = $db->insert_id;
+					$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" created!";
+					$message_color = "green";
+					unset($client_fname, $client_lname, $client_phone, $client_address, $client_address2, $client_city, $client_state, $client_zip);
+				}
 			}
 		}
 	}

@@ -7,6 +7,8 @@
 	if(isset($_POST['searchString'])) {
 		$searchString = mysqli_real_escape_string($db, $_POST['searchString']);
 		$result = $db->query("SELECT * FROM `clients` WHERE `first_name` LIKE '%{$searchString}%' OR `last_name` LIKE '%{$searchString}%' OR `phone` LIKE '%{$searchString}%' ORDER BY `last_name` ASC;");
+		
+		echo "<option value='new_client'>New Client</option>";
 
 		while($client = $result->fetch_assoc()) {
 			echo "<option value='{$client['id']}'>{$client['last_name']}, {$client['first_name']}</option>";
@@ -14,10 +16,12 @@
 	}
 
 	// When an option is selected from the search, we grab all the client's info and echo it into the info div.
-	if(isset($_POST['client_id']) AND $_POST['data'] == "info") {
-		$client_id = mysqli_real_escape_string($db, $_POST['client_id']);
-		$clientInfo = $db->query("SELECT * FROM `clients` WHERE `id` = '$client_id'");
-		$petInfo = $db->query("SELECT `name`, `breed` FROM `pets` WHERE `client_id` = '$client_id'");
+	if((isset($_POST['client_id']) OR isset($_SESSION['editing_client_id'])) AND (isset($_POST['data']) AND $_POST['data'] == "info")) {
+		if(isset($_POST['client_id'])) {
+			$_SESSION['editing_client_id'] = mysqli_real_escape_string($db, $_POST['client_id']);
+		}
+		$clientInfo = $db->query("SELECT * FROM `clients` WHERE `id` = '{$_SESSION['editing_client_id']}'");
+		$petInfo = $db->query("SELECT `name`, `breed` FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
 
 		// Format the data properly and set them to easy to use variables
 		while($client = $clientInfo->fetch_assoc()) {
@@ -77,9 +81,8 @@
 	}
 
 	// For the Previous Reservations Table, we pull the reservations, grab the pets related to it, and format them into a table.
-	if(isset($_POST['client_id']) AND $_POST['data'] == "res") {
-		$client_id = mysqli_real_escape_string($db, $_POST['client_id']);
-		$clientRes = $db->query("SELECT * FROM `reservations` WHERE `client_id` = {$client_id} ORDER BY `start_date` DESC");
+	if(isset($_SESSION['editing_client_id']) AND (isset($_POST['data']) AND $_POST['data'] == "res")) {
+		$clientRes = $db->query("SELECT * FROM `reservations` WHERE `client_id` = '{$_SESSION['editing_client_id']}' ORDER BY `start_date` DESC");
 
 		echo "<table id='prevResTable'>
 			<tr>
@@ -120,5 +123,19 @@
 		}
 		
 		echo "</table>";
+	}
+
+	if(isset($_SESSION['editing_client_id']) AND (isset($_POST['data']) AND $_POST['data'] == 'unsetClient')) {
+		unset($_SESSION['editing_client_id']);
+	}
+
+	if(isset($_GET['data']) AND $_GET['data'] == "editing_client_id") {
+		if(isset($_SESSION['client_created'])) {
+			$_SESSION['editing_client_id'] = $_SESSION['client_created'];
+			unset($_SESSION['client_created']);
+		}
+		if(isset($_SESSION['editing_client_id'])) {
+			echo $_SESSION['editing_client_id'];
+		}
 	}
 ?>

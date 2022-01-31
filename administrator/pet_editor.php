@@ -8,12 +8,6 @@
 	$missingInputs = "";
 	$petSelectOptionsStr = "";
 
-	// Get the client ID just once
-	if(isset($_GET['client_id']) AND !isset($getDone)) {
-		$client_id = mysqli_real_escape_string($db, $_GET['client_id']);
-		$getDone = 1;
-	}
-
 	// On form submit
 	if(isset($_POST['mode']) AND $_POST['mode'] == "create_client") {
 		// Check for required inputs and return cleaned variables
@@ -37,15 +31,23 @@
 				if(is_numeric($pet_id)) {
 					if($_POST['petSelector'] == 0) {
 						// New Pet
-						$db->query("INSERT INTO `pets` (`client_id`, `name`, `breed`) VALUES ('$client_id', '$pet_name', '$pet_breed')");
+						$db->query("INSERT INTO `pets` (`client_id`, `name`, `breed`) VALUES ('{$_SESSION['editing_client_id']}', '$pet_name', '$pet_breed')");
 						$message = "Pet \"" . cleanOutputs($pet_name) . "\" created!";
 						$message_color = "green";
 						unset($pet_id, $pet_name, $pet_breed);
 					} else {
 						// Existing Pet
-						$db->query("UPDATE `pets` SET `name` = '$pet_name', `breed` = '$pet_breed' WHERE `id` = '$pet_id'");
-						$message = "Pet \"" . cleanOutputs($pet_name) . "\" saved!";
-						$message_color = "green";
+						$result = $db->query("SELECT * FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}' AND `id` = '$pet_id'");
+						$count = mysqli_num_rows($result);
+						if($count == 1) {
+							$db->query("UPDATE `pets` SET `name` = '$pet_name', `breed` = '$pet_breed' WHERE `id` = '$pet_id'");
+							$message = "Pet \"" . cleanOutputs($pet_name) . "\" saved!";
+							$message_color = "green";
+						} else {
+							$message = "Invalid Pet!";
+							$message_color = "red";
+							unset($pet_id);
+						}
 					}
 				} else {
 					$message_color = "red";
@@ -57,7 +59,7 @@
 	}
 	
 	// Grab all pets linked to the client and put them in an array to put in our selector and pass to JS to fill in our form	
-	$petInfo = $db->query("SELECT * FROM `pets` WHERE `client_id` = {$client_id}");
+	$petInfo = $db->query("SELECT * FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
 	$petArray = array();
 	while($pet = $petInfo->fetch_assoc()) {
 		$petArray[$pet['id']] = array($pet['name'], cleanOutputs($pet['breed']));  
@@ -94,7 +96,7 @@
 			document.getElementById("pet_name").value = petName;
 			document.getElementById("pet_breed").value = petBreed;
 		}
-
+		
 	</script>
 </head>
 <body>
