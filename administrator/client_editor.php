@@ -7,29 +7,35 @@
 	$message = "";
 	$missingInputs = "";
 	$longInputs = "";
+	$phoneArray = array();
+	$phoneIDArray = array();
 
 	// Initial GET from the Client Viewer. Sets all of the proper variables.
 	if(isset($_SESSION['editing_client_id'])) {
-		$result = $db->query("SELECT * FROM `clients` WHERE `id` = '{$_SESSION['editing_client_id']}'");
-		while($row = $result->fetch_assoc()) {
-			$client_fname = $row['first_name'];
-			$client_lname = $row['last_name'];
-			$client_phone = $row['phone'];
-			$client_address = $row['address'];
-			$client_address2 = $row['address_2'];
-			$client_city = $row['city'];
-			$client_state = $row['state'];
-			$client_zip = $row['zip'];
+		$clientInfo = $db->query("SELECT * FROM `clients` WHERE `id` = '{$_SESSION['editing_client_id']}'");
+		$phoneInfo = $db->query("SELECT `id`, `phone` FROM `phone_numbers` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
+					
+		while($client = $clientInfo->fetch_assoc()) {
+			$client_fname = $client['first_name'];
+			$client_lname = $client['last_name'];
+			$client_address = $client['address'];
+			$client_address2 = $client['address_2'];
+			$client_city = $client['city'];
+			$client_state = $client['state'];
+			$client_zip = $client['zip'];
+		}
+	
+		while($phone = $phoneInfo->fetch_assoc()) {
+			$phoneArray[] = $phone['phone'];
+			$phoneIDArray[] = $phone['id'];
 		}
 	}
 
 	// When the form is submitted, run our inputs through the checkInputs fuction and update the client if no errors are thrown.
-	if(isset($_POST['mode']) AND $_POST['mode'] == "create_client") {
-		
+	if(isset($_POST['mode']) AND $_POST['mode'] == "create_client") {		
 		$inputsArray = array (
 			array('client_fname', 'First Name', 1, 255),
 			array('client_lname', 'Last Name', 1, 255),
-			array('client_phone', 'Phone Number', 1, 20),
 			array('client_address', 'Address', 0, 255),
 			array('client_address2', 'Mailing Address', 0, 255)
 		);
@@ -47,27 +53,85 @@
 				array('client_zip', 'Zip', 1, 255),
 			);
 			checkInputs($inputsArray);
-		} 
+		}
+
+		// Phone Number checks
+		// If at least one phone number is given
+		if(array_filter($_POST['client_phone'])) {
+			$phonePostArray = array_values($_POST['client_phone']);
+			foreach($phonePostArray as $key => $phone) {
+				if(strlen($phone) > 20) {
+					if($longInputs == '') {
+						$longInputs = "Phone Number #" . intval($key) + 1;
+					} else {
+						$longInputs = $longInputs . ", Phone Number #" . intval($key) + 1;
+					}
+				}
+			}
+		} else {
+			if($missingInputs == '') {
+				$missingInputs = "Phone Number";
+			} else {
+				$missingInputs = $missingInputs . ", Phone Number";
+			}
+		}
 
 		// If no errors are given, update the client's info
 		if(!empty($missingInputs)) {
 			$message_color = "red";
 			$message = "Client's {$missingInputs} is Required!";
+			$phoneArray = $phonePostArray;
 		} else {
 			if(!empty($longInputs)) {
 				$message_color = "red";
 				$message = "{$longInputs} is too long of a value!";
+				$phoneArray = $phonePostArray;
 			} else {
 				if(isset($_SESSION['editing_client_id'])) {
-					$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = '{$_SESSION['editing_client_id']}'");
+					$db->query("UPDATE `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip' WHERE `id` = '{$_SESSION['editing_client_id']}'");
+					
+					foreach($phonePostArray as $key => $phone) {
+						$client_phone = mysqli_real_escape_string($db, $phone);
+						if(isset($phoneIDArray[$key])) {
+							if($phone != '') {
+								$db->query("UPDATE `phone_numbers` SET `phone` = '$client_phone' WHERE `id` = '{$phoneIDArray[$key]}'");
+							} else {
+								$db->query("DELETE FROM `phone_numbers` WHERE `id` = '{$phoneIDArray[$key]}'");
+							}
+						} else {
+							if($phone != '') {
+								$db->query("INSERT INTO `phone_numbers` SET `client_id` = '{$_SESSION['editing_client_id']}', `phone` = '$client_phone'");
+							}
+						}
+					}	
+					
+					$phoneInfo = $db->query("SELECT `id`, `phone` FROM `phone_numbers` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
+					$phoneArray = array();
+					
+					while($phone = $phoneInfo->fetch_assoc()) {
+						$phoneArray[] = $phone['phone'];
+						$phoneIDArray[] = $phone['id'];
+					}
+					
 					$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" updated!";
 					$message_color = "green";
 				} else {					
-					$db->query("INSERT INTO `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `phone` = '$client_phone', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip'");
+					$db->query("INSERT INTO `clients` SET `first_name` = '$client_fname', `last_name` = '$client_lname', `address` = '$client_address', `address_2` = '$client_address2', `city` = '$client_city', `state` = '$client_state', `zip` = '$client_zip'");
 					$_SESSION['client_created'] = $db->insert_id;
+					
+					foreach($phonePostArray as $key => $phone) {
+						if($phone != '') {
+							$client_phone = mysqli_real_escape_string($db, $phone);
+							$db->query("INSERT INTO `phone_numbers` SET `client_id` = '{$_SESSION['client_created']}', `phone` = '$client_phone'");
+						}
+					}	
+					
 					$message = "Client \"" . cleanOutputs($client_fname) . " " .  cleanOutputs($client_lname) . "\" created!";
 					$message_color = "green";
-					unset($client_fname, $client_lname, $client_phone, $client_address, $client_address2, $client_city, $client_state, $client_zip);
+					
+					unset($client_fname, $client_lname, $client_address, $client_address2, $client_city, $client_state, $client_zip);
+					$phoneArray = array();
+					$phoneIDArray = array();
 				}
 			}
 		}
@@ -129,11 +193,12 @@
 	];
 
 ?>
-<html>
+<!DOCTYPE html>
 <head>
 	<title>Edit Client</title>
 
 	<link rel="stylesheet" type="text/css" href="popupform.css"/>
+	<script src="https://cdn.jsdelivr.net/npm/iframe-resizer@4.2.11/js/iframeResizer.contentWindow.min.js"></script>
 </head>
 <body>
 	<h2 style="float: left; margin-top: 0px;">Edit Client</h2>
@@ -154,7 +219,28 @@
 				<input type="text" id="client_lname" name="client_lname" value="<?php if(isset($client_lname)){ echo cleanOutputs($client_lname);}?>">
 
 				<label for="client_phone">Phone Number</label>
-				<input type="text" id="client_phone" name="client_phone" value="<?php if(isset($client_phone)){ echo cleanOutputs($client_phone);}?>">
+				<div id="phone_numbers">
+				</div>
+				<script>
+					var phoneArray = <?php if(array_filter($phoneArray)) { echo json_encode($phoneArray);} else { echo "''"; } ?>;
+	
+					const el = document.createElement('input');
+					el.setAttribute('type', 'text');
+					el.setAttribute('name', 'client_phone[]');
+					
+					function newNumber() {
+						document.getElementById("phone_numbers").appendChild(el.cloneNode(true));
+					}
+
+					if(phoneArray != '') {
+						phoneArray.forEach(function(phone) {
+							document.getElementById("phone_numbers").innerHTML += `<input type='text' name='client_phone[]' value='${phone}'>`;
+						});
+					} else {
+						newNumber();
+					}
+				</script>
+				<a href="#" onclick="newNumber()">Add Number</a>
 
 			</div>
 
