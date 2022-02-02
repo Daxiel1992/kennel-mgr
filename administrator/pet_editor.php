@@ -72,10 +72,11 @@
 	}
 	$petArrayJS = json_encode($petArray);
 ?>
-<html>
+<!DOCTYPE html>
 <head>
 	<title>Edit Pets</title>
 	<link rel="stylesheet" type="text/css" href="popupform.css"/>
+	<script src="https://cdn.jsdelivr.net/npm/iframe-resizer@4.2.11/js/iframeResizer.contentWindow.min.js"></script>
 	<script>
 		<?php
 			// Passing the pet array into JS
@@ -132,7 +133,7 @@
 		</div>
 
 		<div style="float: right;">
-			<input type="submit" class="form_button" value="Save Pet">
+			<input type="submit" class="form_button" value="Save Pet" style="margin-bottom: 8px;">
 		</div>
 	</form>	
 	
