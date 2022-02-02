@@ -5,8 +5,20 @@
 
 	// Controller for the search portion of the Client Viewer. Takes an input string, searches for matches in the users table in the name and phone number, and returns all matches as options in select.
 	if(isset($_POST['searchString'])) {
+		$phoneIDs = "''";
+		$phoneIDArray = array();
 		$searchString = substr(mysqli_real_escape_string($db, $_POST['searchString']), 0, 40);
-		$result = $db->query("SELECT * FROM `clients` WHERE `first_name` LIKE '%{$searchString}%' OR `last_name` LIKE '%{$searchString}%' OR `phone` LIKE '%{$searchString}%' ORDER BY `last_name` ASC;");
+		if($searchString != '') {
+			$result = $db->query("SELECT `client_id` FROM `phone_numbers` WHERE `phone` LIKE '%{$searchString}%'");
+			$count = mysqli_num_rows($result);
+			if($count > 0) {
+				while($row = $result->fetch_assoc()) {
+					$phoneIDArray[] = $row['client_id'];
+				}
+				$phoneIDs = implode(", ",  $phoneIDArray);
+			}
+		}
+		$result = $db->query("SELECT * FROM `clients` WHERE `first_name` LIKE '%{$searchString}%' OR `last_name` LIKE '%{$searchString}%' OR `id` IN ({$phoneIDs}) ORDER BY `last_name` ASC;");
 		
 		echo "<option value='new_client'>New Client</option>";
 
@@ -22,11 +34,11 @@
 		}
 		$clientInfo = $db->query("SELECT * FROM `clients` WHERE `id` = '{$_SESSION['editing_client_id']}'");
 		$petInfo = $db->query("SELECT `name`, `breed` FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
+		$phonesInfo = $db->query("SELECT `phone` FROM `phone_numbers` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
 
 		// Format the data properly and set them to easy to use variables
 		while($client = $clientInfo->fetch_assoc()) {
 			$client_name = cleanOutputs($client['first_name']) . " " . cleanOutputs($client['last_name']);
-			$client_phone = cleanOutputs($client['phone']);
 			$client_address = cleanOutputs($client['address']);
 			$client_address2 = cleanOutputs($client['address_2']);
 			if($client['city'] != '') {
@@ -40,10 +52,15 @@
 			$petArray[] = cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']);
 		}
 		
+		while($number = $phonesInfo->fetch_assoc()) {
+			$phoneArray[] = cleanOutputs($number['phone']);
+		}
+		
 		// If there are no pets, set the array blank to avoid errors
 		if(!isset($petArray)) {
 			$petArray[] = "";
 		}
+		
 		// Display the information
 		echo "<div id='clientInfo'>";
 			echo "<p>Name: {$client_name}</p>";
@@ -57,7 +74,14 @@
 			echo "</div>";
 		echo "</div>";
 		echo "<div id='clientInfo'>";
-			echo "<p>Phone: {$client_phone}</p>";
+			echo "<div style='position: relative; margin: 1em 0px 1em 20px;'>";
+				echo "<p style='margin: 0px; display: inline-block; position: absolute; top: 0px; left: 0px'>Phone:</p>";
+				echo "<p style='display: inline-block; margin: 0px 0px 0px 50px;'>";
+				foreach ($phoneArray as $number) {
+						echo "{$number}<br>";
+				} 
+				echo "</p>";
+			echo "</div>";
 			echo "<div style='position: relative;'>";
 				echo "<p style='margin: 0px; display: inline-block; position: absolute; top: 0px; left: 0px'>Address:</p>";
 				echo "<p style='display: inline-block; margin: 0px 0px 0px 61px;'>";
