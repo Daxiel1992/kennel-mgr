@@ -76,12 +76,10 @@
 	<div id="nav-links">	
 		<input type="button" id="show_cal" onclick="showiFrame('cal')" value="Calendar">
 		<input type="button" id="show_viewer" onclick="showiFrame('clientViewer')" value="Client Viewer">
-		<input type="button" id="show_res" onclick="showiFrame('res')" value="New Reservation">
 	</div>
 </div>
 <div id="main_block">
 <iframe id="cal" src="calendar.php" style="display: block;"></iframe>
-<iframe id="res" src="reservation.php" style="display: none;"></iframe>
 <iframe id="clientViewer" src="client_viewer.html" style="display: none;"></iframe>
 </div>
 </body>

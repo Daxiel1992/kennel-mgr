@@ -29,6 +29,7 @@
 
 	// When an option is selected from the search, we grab all the client's info and echo it into the info div.
 	if((isset($_POST['client_id']) OR isset($_SESSION['editing_client_id'])) AND (isset($_POST['data']) AND $_POST['data'] == "info")) {
+		// If a client_id is passed, set our Session variable to allow our iFrames to know which user's info to use
 		if(isset($_POST['client_id'])) {
 			$_SESSION['editing_client_id'] = mysqli_real_escape_string($db, $_POST['client_id']);
 		}
@@ -98,6 +99,7 @@
 			echo "</div>";
 		echo "</div>";
 		echo "<div id='clientLinks'>
+			<a href='#' onclick=\"showFloating('create_res')\">Create Reservation</a>
 			<a href='#' onclick='showFloating(\"client\")'>Edit Client</a>
 			<a href='#' onclick='showFloating(\"pet\")'>Add/Edit Pets</a>
 		</div>";
