@@ -80,7 +80,6 @@
 		if(!empty($missingInputs)) {
 			$message_color = "red";
 			$message = "Client's {$missingInputs} is Required!";
-			$phoneArray = $phonePostArray;
 		} else {
 			if(!empty($longInputs)) {
 				$message_color = "red";

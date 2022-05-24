@@ -62,7 +62,7 @@
 	$petInfo = $db->query("SELECT * FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
 	$petArray = array();
 	while($pet = $petInfo->fetch_assoc()) {
-		$petArray[$pet['id']] = array($pet['name'], cleanOutputs($pet['breed']));  
+		$petArray[$pet['id']] = array(cleanOutputs($pet['name']), cleanOutputs($pet['breed']));  
 
 		if(isset($pet_id) AND $pet_id == $pet['id']) {
 			$petSelectOptionsStr = $petSelectOptionsStr .  "<option value=\"{$pet['id']}\" selected>" . cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']) . "</option>";

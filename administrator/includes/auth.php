@@ -19,7 +19,7 @@
 	$currentTime = date('Y-m-d H:i:s');
 
 	if($last_active < $currentTime) {
-		header('Location: includes/logout.php');
+	//	header('Location: includes/logout.php');
 	}
 
 	function updateActivity($userid, $db) {

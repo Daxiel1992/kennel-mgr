@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	require '../includes/dbConfig.php';
-	require 'includes/auth.php';
+//	require 'includes/auth.php';
 ?>
 <html>
 <head>

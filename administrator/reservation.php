@@ -1,3 +1,14 @@
+<?php
+	session_start();
+	require '../includes/dbConfig.php';
+	require '../includes/commonFunctions.php';
+
+	$petInfo = $db->query("SELECT * FROM `pets` WHERE `client_id` = '{$_SESSION['editing_client_id']}'");
+	$petSelectOptionsStr = '';
+	while($pet = $petInfo->fetch_assoc()) {
+		$petSelectOptionsStr = $petSelectOptionsStr .  "<option value=\"{$pet['id']}\">" . cleanOutputs($pet['name']) . " - " . cleanOutputs($pet['breed']) . "</option>";
+	}
+?>
 <!DOCTYPE html>
 <head>
 	<title>Create Reservation</title>
@@ -9,6 +20,18 @@
 	<script>
 		$(document).ready(function() {
 			$('.select2-multiple').select2();
+			
+			// Set our Separate Checkbox as display none and only show it if more than 1 pet is selected as staying
+			var sep_check = document.getElementById("sep_wrapper");
+			sep_check.style.display = "none";
+
+			$('#pets').on('change', function (e) {
+				if($('#pets').val().length < '2') {
+					sep_check.style.display = "none";
+				} else {
+					sep_check.style.display = "inline-block";
+				}
+			});
 		});
 	</script>
 </head>
@@ -35,12 +58,19 @@
 		</div>
 		<div style="position: relative; left: 12px; width: 97.5%;">
 			<label for="petSelector">Select Pets</label>
-			<select class="select2-multiple" id="pets" name="pets[]" style="width: 75%;" multiple>
+			<select class="select2-multiple" id="pets" name="pets[]" style="width: 92%;" multiple>
+				<?php
+					echo $petSelectOptionsStr;
+				?>
 			</select>
+			<label for="separated" id="sep_wrapper">
+				<input type="checkbox" id="separated" name="separated" value="y">
+				<span>Separated?</span>
+			</label>
 		</div>
 
 		<div style="float: right;">
-			<input type="submit" class="form_button" value="Save Pet" style="margin-bottom: 8px;">
+			<input type="submit" class="form_button" value="Save Pet" style="margin: 8px 0;">
 		</div>
 	</form>	
 	
