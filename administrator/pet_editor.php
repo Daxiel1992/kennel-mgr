@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	require '../includes/dbConfig.php';
-	require '../includes/commonFunctions.php';
+	require 'includes/commonFunctions.php';
 	
 	// Create needed variables
 	$message = "";

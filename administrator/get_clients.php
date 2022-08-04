@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	require_once('../includes/dbConfig.php');
-	require '../includes/commonFunctions.php';
+	require 'includes/commonFunctions.php';
 
 	// Controller for the search portion of the Client Viewer. Takes an input string, searches for matches in the users table in the name and phone number, and returns all matches as options in select.
 	if(isset($_POST['searchString'])) {

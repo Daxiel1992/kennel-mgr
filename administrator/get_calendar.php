@@ -1,6 +1,6 @@
 <?php
 	require	'../includes/dbConfig.php';
-	require '../includes/commonFunctions.php';
+	require 'includes/commonFunctions.php';
 
 	// Format date string passed by the JS. If none was provided, just use today's date.	
 	if(isset($_POST['newDate'])) {

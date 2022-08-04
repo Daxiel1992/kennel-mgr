@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<head>
+	<title>Create Reservation</title>
+	<link rel="stylesheet" type="text/css" href="popupform.css"/>
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/iframe-resizer@4.2.11/js/iframeResizer.contentWindow.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<script>
+		$(document).ready(function() {
+			$('.select2-multiple').select2();
+			document.getElementById("js_warnings").innerHTML = "";
+			
+			// Make jQuery POST to grab all pets formatted nicely into options for the select box
+			$.post("reservations.php", { data: "pet_options" }, function(data){
+				if(data == '') {
+					document.getElementById("js_warnings").innerHTML = "Customer needs pets to be able to make a reservation!";
+				} else {
+					document.getElementById('pets').innerHTML = data;
+				}
+			});
+
+			// Set our Separate Checkbox as display none and only show it if more than 1 pet is selected as staying
+			var sep_wrapper = document.getElementById("sep_wrapper");
+			let separated = document.getElementById('separated');
+			sep_wrapper.style.display = "none";
+
+			$('#pets').on('change', function (e) {
+				if($('#pets').val().length < '2') {
+					$('.select2-container').css('width', '100%');
+					sep_wrapper.style.display = "none";
+					separated.checked = false;
+				} else {
+					$('.select2-container').css('width', '91%');
+					sep_wrapper.style.display = "inline-block";
+				}
+			});
+		});
+
+		// Simple check to see if the required inputs were filled out
+		function checkInput(input, name) {
+			if ((typeof input === 'string' && input == "") || (typeof input === 'object' && input.length == 0)) {
+				document.getElementById("js_warnings").innerHTML += name + " is required! <br>";
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		let openKennels;
+		// This has to be async because JS won't wait for my jQuery post requests to finish....
+		async function submitDatesAndPets() {
+			// Grab all values from previous form
+			document.getElementById("js_warnings").innerHTML = "";
+			document.getElementById("js_warnings").style.color = "red";
+			let startDate = document.getElementById('start_date').value;
+			let endDate = document.getElementById('end_date').value;
+			let pets = $('#pets').select2('data');
+			let separated = document.getElementById('separated').checked;
+
+			// Initial check to see if the input is valid
+			let startDateValid = checkInput(startDate, "Start Date");
+			let endDateValid = checkInput(endDate, "End Date");
+			let petsValid = checkInput(pets, "Pets");
+			let datesValid = false;
+
+			if (startDateValid && endDateValid) {
+				if (startDate <= endDate) {
+					datesValid = true;
+				} else {
+					datesValid = false;
+					document.getElementById("js_warnings").innerHTML += "End Date cannot be before Start Date! <br>";
+				}
+			}
+
+			if (datesValid && petsValid) {
+				// Get open kennels for specified date
+				await $.post("reservations.php", { data: "get_kennel_avail", start_date: startDate, end_date: endDate }, function(data){
+					openKennels = JSON.parse(data);
+				});
+
+				// If openKennels is empty, we know there are no kennels available
+				if(openKennels == null) {
+					document.getElementById("js_warnings").innerHTML += "No Kennels Available For Given Dates!";
+					return;
+				} else {
+					document.getElementById("js_warnings").style.color = "green";
+					document.getElementById("js_warnings").innerHTML += openKennels.length + " Kennels Open!";
+				}
+
+				// Put the kennels in formatted option tags to paste into our select boxes
+				let openKennelOptionsStr = "";
+				openKennels.forEach(function(kennel) {
+					openKennelOptionsStr += `<option value='` + kennel['id'] + `'>` + kennel['name'] + `</option>`;
+				});
+
+				// Put dates in their read-only box
+				document.getElementById('readStartDate').innerHTML = "Start Date: " + startDate;
+				document.getElementById('readEndDate').innerHTML = "End Date: " + endDate;
+
+				// Put pets in nice list in read-only, and create the kennel select boxes depending on the number of pets and in they are separated or not.
+				// Initialization
+				document.getElementById('readPets').innerHTML = "";
+				let content = "";
+				let names = "";
+				pets.forEach(function(pet, index) {
+					// Split the name and breed for easy formatting
+					pet = pet['text'].split('-');
+					var name = pet[0].trim();
+					var breed = pet[1].trim();
+					// Put pets in read-only list
+					document.getElementById('readPets').innerHTML += name + " - " + breed + "<br>";
+
+					// If separated, create select box for each pet (along with special formatting so the form can handle any number of pets). If not, put pets names all on one select box.
+					var selectBox = `
+						<div class='input_div'>
+							<label for='kennel` + index + `'>Kennel for ` + name + `</label>
+							<select id='kennel` + index + `' name='kennel[]'>` + openKennelOptionsStr + `</select>
+						</div>
+					`;
+
+					if (separated == true && index % 2 == 0) {
+						content += `<div class='flex-wrapper'>` + selectBox;
+					} else if (separated == true && index % 2 != 0){
+						content += selectBox + `</div>`;
+					} else {
+						if (index == 0) {
+							names = name;
+						} else {
+							names += ", " + name;
+						}
+
+						if (index == pets.length - 1) {
+							content += `<div class="flex-wrapper">
+									<div class="input_div">
+										<label for="kennel0">Kennel for ` + names + `</label>
+										<select id="kennel0" name="kennel[]">` + openKennelOptionsStr + `</select>
+									</div>
+								</div>
+							`;
+						}
+					}
+				});
+				document.getElementById('kennels').innerHTML = content;
+				
+				// Show the next form, hide the previous.
+				document.getElementById('kennel_wrapper').style.display = "block";
+				document.getElementById('date_and_pets').style.display = "none";
+				return;
+			}
+		}
+
+		// Just hide the second form and show the first....
+		function editButton() {
+			document.getElementById('kennel_wrapper').style.display = "none";
+			document.getElementById('date_and_pets').style.display = "block";
+		}
+
+		async function createReservation() {
+			document.getElementById("js_warnings").style.color = "red";
+			// Grab all values from previous form
+			document.getElementById("js_warnings").innerHTML = "";
+			let startDate = document.getElementById('start_date').value;
+			let endDate = document.getElementById('end_date').value;
+			let pets = $('#pets').select2('data');
+			let separated = document.getElementById('separated').checked;
+			let kennels = [];
+			document.getElementsByName('kennel[]').forEach(function(item) {
+				kennels.push(item.value);
+			});
+
+			// Initial check to see if the input is valid
+			let startDateValid = checkInput(startDate, "Start Date");
+			let endDateValid = checkInput(endDate, "End Date");
+			let petsValid = checkInput(pets, "Pets");
+			let datesValid = false;
+
+			if (startDateValid && endDateValid) {
+				if (startDate <= endDate) {
+					datesValid = true;
+				} else {
+					datesValid = false;
+					document.getElementById("js_warnings").innerHTML += "End Date cannot be before Start Date! <br>";
+				}
+			}
+			// Create petsKennelsArray which is passed to PHP. The array is formatted like array { array { id: kennel }, array{ id : kennel } }
+			let petsKennelsArray = {};
+			if (datesValid && petsValid) {
+				if(separated == true) {
+					pets.forEach(function(pet, index){
+						petsKennelsArray[pet['id']] = kennels[index];
+					});
+				} else {
+					pets.forEach(function(pet){
+						petsKennelsArray[pet['id']] = kennels[0];
+					});
+				}
+
+				// POST the data. the PHP will respond with a string, either "ERROR" or "SUCCESS" or nothing (in which case, something internal is wrong). Whatever the response, we do the same thing and just display a message, and if it was successful, also reset the form.
+				await $.post("reservations.php", { data: "create_reservation", start_date: startDate, end_date: endDate, pets_kennels_array: petsKennelsArray }, function(data){
+					if(data.startsWith("ERROR")) {
+						document.getElementById("js_warnings").innerHTML += data.slice(7);
+					} else if (data.startsWith("SUCCESS")) {
+						document.getElementById("js_warnings").style.color = "green";
+						document.getElementById("js_warnings").innerHTML += data.slice(9);	
+						document.getElementById("date_and_pets_form").reset();
+						$('#pets').val(null).trigger('change');
+						editButton();
+					} else {
+						document.getElementById("js_warnings").innerHTML = "Unknown Error. Please refresh the page and try again.";
+					}
+				});
+			}
+		}
+	</script>
+</head>
+<body>
+	<h2 style="float: left; margin-top: 0px; margin-right: 12px;">Create Reservation</h2>
+	<h4 id="js_warnings" style='color: red; display: contents;'></h4>
+	
+	<div id="date_and_pets" style="position: absolute; top: 45px; width: calc(100% - 12px);">
+		<form id="date_and_pets_form">
+			<div class="flex-wrapper">
+				<div class="input_div">	
+					<label for="start_date">Start Date</label>
+					<input type="date" id="start_date" name="start_date" value="">
+				</div>
+				<div class="input_div">
+					<label for="end_date">End Date</label>
+					<input type="date" id="end_date" name="end_date" value="">
+				</div>					
+			</div>
+			<div style="position: relative; left: 12px; width: 97.5%;">
+				<label for="petSelector" style="margin-bottom: 8px;">Select Pets</label><br>
+				<select class="select2-multiple" id="pets" name="pets[]" style="" multiple></select>
+				<label for="separated" id="sep_wrapper" style="float: right; width: 8%">
+					<span>Separate?</span>
+					<input type="checkbox" style="width: 87%;" id="separated" name="separated" value="1">
+				</label>
+			</div>
+		</form>
+		<br>
+
+		<div style="float: right;">
+			<button onclick="submitDatesAndPets()" class="form_button" style="margin: 8px 0;">Submit Dates and Pets</button>
+		</div>
+	</div>	
+
+	<div id="kennel_wrapper" style="position: absolute; width: calc(100% - 12px); top: 45px; display: none;"> 
+		<div id="read_date_and_pets" style="min-width: calc(100% - 530px); width: fit-content; margin-left: 12px; border: solid black 1px; background-color: lightgray;">
+			<div class="flex-wrapper">
+				<div class="input_div">
+					<p id="readStartDate"></p>
+				</div>
+				<div class="input_div">
+					<p id="readEndDate"></p>
+				</div>
+			</div>
+			<div class="flex-wrapper">
+				<div class="input_div" style="width: fit-content;">
+					<p style="display: inline-block; position: absolute;">Pets: </p>
+					<p id="readPets" style="display: inline-block; margin-left: 37px;"></p>
+				</div>
+				<div class="input_div" style="width: auto;">
+					<a href="#" onclick="editButton()" style="float: right; margin-top: 1em;">Edit</a>
+				</div>
+			</div>
+		</div>
+		<div id="kennels_form" style="margin-top: 12px;">
+			<div id="kennels"></div>
+			<div style="float: right;">
+				<button onclick="createReservation()" class="form_button" style="margin: 8px 0;">Create Reservation</button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

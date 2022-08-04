@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	require '../includes/dbConfig.php';
-	require '../includes/commonFunctions.php';
+	require 'includes/commonFunctions.php';
 
 	// Set empty variables to avoid errors	
 	$message = "";
@@ -200,7 +200,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/iframe-resizer@4.2.11/js/iframeResizer.contentWindow.min.js"></script>
 </head>
 <body>
-	<h2 style="float: left; margin-top: 0px;">Edit Client</h2>
+	<h2 id="header" style="float: left; margin-top: 0px;"></h2>
 	<?php
 		if(!empty($message)) {
 			echo "<h4 style='color: {$message_color}; float: left; margin-top: 6px; margin-left: 20px;'>{$message}</h4>";
@@ -218,27 +218,7 @@
 				<input type="text" id="client_lname" name="client_lname" value="<?php if(isset($client_lname)){ echo cleanOutputs($client_lname);}?>">
 
 				<label for="client_phone">Phone Number</label>
-				<div id="phone_numbers">
-				</div>
-				<script>
-					var phoneArray = <?php if(array_filter($phoneArray)) { echo json_encode($phoneArray);} else { echo "''"; } ?>;
-	
-					const el = document.createElement('input');
-					el.setAttribute('type', 'text');
-					el.setAttribute('name', 'client_phone[]');
-					
-					function newNumber() {
-						document.getElementById("phone_numbers").appendChild(el.cloneNode(true));
-					}
-
-					if(phoneArray != '') {
-						phoneArray.forEach(function(phone) {
-							document.getElementById("phone_numbers").innerHTML += `<input type='text' name='client_phone[]' value='${phone}'>`;
-						});
-					} else {
-						newNumber();
-					}
-				</script>
+				<div id="phone_numbers"></div>
 				<a href="#" onclick="newNumber()">Add Number</a>
 
 			</div>
@@ -276,9 +256,31 @@
 		</div>
 		
 		<div style="float: right;">
-			<input type="submit" class="form_button" value="Save Changes">
+			<input type="submit" class="form_button" value="Save Client">
 		</div>
 	</form>	
 	
+	<script>
+		var phoneArray = <?php if(array_filter($phoneArray)) { echo json_encode($phoneArray);} else { echo "''"; } ?>;
+		document.getElementById("phone_numbers").innerHTML = '';
+
+		const el = document.createElement('input');
+		el.setAttribute('type', 'text');
+		el.setAttribute('name', 'client_phone[]');
+		
+		function newNumber() {
+			document.getElementById("phone_numbers").appendChild(el.cloneNode(true));
+		}
+
+		if(phoneArray != '') {
+			document.getElementById("header").innerHTML = "Edit Client";
+			phoneArray.forEach(function(phone) {
+				document.getElementById("phone_numbers").innerHTML += `<input type='text' name='client_phone[]' value='${phone}'>`;
+			});
+		} else {
+			document.getElementById("header").innerHTML = "New Client";
+			newNumber();
+		}
+	</script>
 </body>
 </html>
